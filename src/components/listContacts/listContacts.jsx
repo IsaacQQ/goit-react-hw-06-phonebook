@@ -1,22 +1,35 @@
-import { createSlice, nanoid } from '@reduxjs/toolkit';
-import PropTypes from 'prop-types';
 import React from 'react';
-import contactSlice from 'redux/contacts/contact-slice';
-import filterSlice from 'redux/filter/filter-slice';
 import { ListElement, DeleteBtn } from './listContacts.styled';
-import { useState } from 'react';
-import { getContacts } from 'redux/contacts/contact-selectors';
 import { useSelector, useDispatch } from 'react-redux';
+import { getContacts } from 'redux/contacts/contact-selectors';
+import { getFilter } from 'redux/filter/filter-selectors';
+import { removeContact } from 'redux/contacts/contact-slice';
 
 
-export default function ListContact({ removeContact }) {
-  const items = useSelector(getContacts)
-  const elements = items.map(({ id }) => {
-    
+export default function ListContact() {
+  const contacts = useSelector(getContacts);
+  const filter = useSelector(getFilter);
+  const dispatch = useDispatch();
+
+  const onRemoveContact = id => {
+    const action = removeContact(id);
+    dispatch(action);
+  };
+
+  const getFilteredContacts = () => {
+    const normalizeFilter = filter.toLocaleLowerCase();
+    return contacts.filter(({ name }) => {
+      const normalizeName = name.toLocaleLowerCase();
+      return normalizeName.includes(normalizeFilter);
+    });
+  };
+
+
+  const elements = getFilteredContacts().map(({ name, number, id }) => {
     return (
       <ListElement key={id}>
-        {items.name}: {items.number}
-        <DeleteBtn type="button" onClick={() => removeContact(id)}>
+        {name}: {number}
+        <DeleteBtn type="button" onClick={() => onRemoveContact(id)}>
           Delete
         </DeleteBtn>
       </ListElement>
@@ -24,5 +37,7 @@ export default function ListContact({ removeContact }) {
   });
   return <ul>{elements}</ul>;
 }
+
+
 
 

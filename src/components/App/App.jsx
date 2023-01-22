@@ -6,13 +6,12 @@ import { Wrapper } from './App.styled';
 import { useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { getContacts } from 'redux/contacts/contact-selectors';
-import { getFilter } from 'redux/filter/filter-selectors';
-import { addContact, removeContact } from 'redux/contacts/contact-slice';
+import { addContact } from 'redux/contacts/contact-slice';
 import { setFilter } from 'redux/filter/filter-slice';
+
 
 export default function App() {
   const contacts = useSelector(getContacts);
-  const filter = useSelector(getFilter);
   const dispatch = useDispatch();
   useEffect(() => {
     return () => {
@@ -21,6 +20,7 @@ export default function App() {
   }, []);
 
   const onAddContact = contact => {
+    console.log(contact)
     if (isDuplicate(contact)) {
       return alert(`${contact.name} is already in contacts`);
     }
@@ -28,43 +28,20 @@ export default function App() {
     dispatch(action);
   };
 
-  const onRemoveContact = id => {
-    const action = removeContact(id);
-    dispatch(action);
-  };
-
-  const handleChange = e => {
-    const { value } = e.currentTarget;
-    dispatch(setFilter(value));
-  };
 
   const isDuplicate = ({ name }) => {
     const result = contacts.find(item => item.name === name);
     return result;
   };
 
-  const getFilteredContacts = () => {
-    if (!filter) {
-      return contacts;
-    }
-    const normalizeFilter = filter.toLocaleLowerCase();
-    const filterContacts = contacts.filter(({ name }) => {
-      const normalizeName = name.toLocaleLowerCase();
-      const result = normalizeName.includes(normalizeFilter);
-      return result;
-    });
-    return filterContacts;
-  };
-
-  const filteredContacts = getFilteredContacts();
 
   return (
     <Wrapper>
       <h1>Phonebook</h1>
       <Form onSubmit={onAddContact} />
       <h1>Contacts</h1>
-      <Filter value="filter" onChange={handleChange} />
-      <ListContact items={filteredContacts} removeContact={onRemoveContact} />
+      <Filter />
+      <ListContact />
     </Wrapper>
   );
 }
